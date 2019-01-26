@@ -1,18 +1,28 @@
 #include "main.h"
 
-void showRelaySwitches(Stream *serial, uint8_t unit, uint8_t start) {
+void showRelaySwitches(Stream *serial, uint8_t unit, uint8_t start, bool reverse) {
   uint8_t i;
   int8_t sw;
 
   serial->print(F("Relays    --"));
-  for (i = start + 1; i < start + 13; i++) {
+  for (
+    i = reverse ? start + 12 : start + 1; 
+    reverse ? i > start : i <= start + 12;
+    reverse ? i-- : i++
+  ) {
     serial->print(i);
     serial->print(i < 10 ? "--" : "-");
   }
+  
   serial->println();
   serial->println(F("            |  |  |  |  |  |  |  |  |  |  |  |"));
   serial->print(  F("Switches    "));
-  for (i = start; i < start + 12; i++) {
+  
+  for (
+    i = reverse ? start + 11 : start; 
+    reverse ? i >= start : i < start + 12; 
+    reverse ? i-- : i++
+  ) {
     sw = relay_map[i + unit * 24] + 1;
     if (sw) {
       serial->print(sw);
@@ -72,15 +82,14 @@ void loadConfiguration() {
 
 void showRelayMap(Stream *serial) {
   serial->println(F("Relay map unit 1:"));
-  showRelaySwitches(serial, 0, 0);
+  showRelaySwitches(serial, 0, 12, true);
   serial->println();
-  serial->println();
-  showRelaySwitches(serial, 0, 12);
+  showRelaySwitches(serial, 0, 0, false);
   serial->println();
 
   serial->println(F("Relay map unit 2:"));
-  showRelaySwitches(serial, 1, 0);
+  showRelaySwitches(serial, 1, 12, true);
   serial->println();
-  showRelaySwitches(serial, 1, 12);
+  showRelaySwitches(serial, 1, 0, false);
   serial->println();
 };
