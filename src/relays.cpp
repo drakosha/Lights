@@ -2,6 +2,7 @@
 
 void showRelaySwitches(Stream *serial, uint8_t unit, uint8_t start) {
   uint8_t i;
+  int8_t sw;
 
   serial->print(F("Relays    --"));
   for (i = start + 1; i < start + 13; i++) {
@@ -12,8 +13,11 @@ void showRelaySwitches(Stream *serial, uint8_t unit, uint8_t start) {
   serial->println(F("            |  |  |  |  |  |  |  |  |  |  |  |"));
   serial->print(  F("Switches    "));
   for (i = start; i < start + 12; i++) {
-    serial->print(relay_map[i + unit * 24]);
-    serial->print(relay_map[i + unit * 24] < 10 ? "  " : " ");
+    sw = relay_map[i + unit * 24] + 1;
+    if (sw) {
+      serial->print(sw);
+      serial->print(((sw < 10) && (sw > 0)) ? "  " : " ");
+    } else serial->print(F("x  "));
   }
   serial->println();
 }
@@ -25,11 +29,14 @@ void showSwitchConfig(Stream *serial) {
   for (uint8_t i = 0; i < SWITCH_COUNT; i++) {
     Switch & s = switches[i];
 
-    if (!s.enabled()) continue;
+    if (!s.enabled) continue;
 
-    serial->print(i);
-    serial->print(i < 10 ? "  = " : " = ");
+    serial->print(i + 1);
+    serial->print(i < 11 ? "  = " : " = ");
     serial->print(s.getPin());
+    serial->print(F(" ["));
+    serial->print(s.read() ? F("HIGH") : F("LOW"));
+    serial->println(F("]"));
   }
 }
 
@@ -42,20 +49,20 @@ void saveConfiguration() {
 
   // saving switches configuration
   for (i = 0; i < SWITCH_COUNT; i++) {
-    EEPROM.update(i + RELAY_COUNT, switches[i].getPin());
+    EEPROM.update(i + RELAY_COUNT, switches[i].enabled ? switches[i].getPin() : -1);
   }
 }
 
 void loadConfiguration() {
   uint8_t i;
-  uint8_t pin;
+  int8_t pin;
 
   for (i = 0; i < RELAY_COUNT; i++) 
     relay_map[i] = EEPROM.read(i);
 
   for (i = 0; i < SWITCH_COUNT; i++) {
     pin = EEPROM.read(i + RELAY_COUNT);
-    if (pin) {
+    if (pin != -1) {
       switches[i].attach(pin, INPUT_PULLUP);
       switches[i].enable();
     } else
