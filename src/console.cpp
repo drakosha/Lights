@@ -72,6 +72,14 @@ void SerialConsole::commandHandler(int argc, char ** argv) {
       m_serial->println(F("Error: Unknown object"));
   } else if (!strcmp(command, "help")) {
     cmdHelp(m_serial);
+  } else if (!strcmp(command, "debug")) {
+    for (pin=22; pin<44; pin++) {
+      Serial.print(pin);
+      Serial.print(" - ");
+      Serial.print(digitalRead(pin) ? "HIGH" : "LOW ");
+      Serial.print("; ");
+      if (!((pin - 21) % 5)) Serial.println();
+    }
   }
   
   m_serial->println();
@@ -86,7 +94,8 @@ void cmdHelp(Stream * serial) {
   serial->println(F("switch <enable|disable> <switch_id> <pin> - config switch"));
   serial->println(F("save - save configuration to EEPROM"));
   serial->println(F("load - load configuration from EEPROM"));
-  serial->println(F("show <relay|switch>- show current configuration"));
+  serial->println(F("show <relay|switch> - show current configuration"));
+  serial->println(F("debug - show current pin states"));
 }
 
 void SerialConsole::errorHandler(consoleError err) {

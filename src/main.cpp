@@ -2,6 +2,7 @@
 
 int8_t relay_map[RELAY_COUNT];
 int8_t relay_state_map[RELAY_COUNT];
+unsigned long last_updated_at;
 bool relay_state_updated = false;
 
 Switch switches[SWITCH_COUNT];
@@ -30,7 +31,7 @@ void setup()
   DmxSimple.maxChannel(16);
 
   for(int i=1; i<16; i++) DmxSimple.write(i, 255);
-// communicate with Modbus slave ID 2 over Serial (port 0)
+  last_updated_at = millis();
 }
 
 void loop()
@@ -39,19 +40,17 @@ void loop()
   console.pull();
 
   for (i=0; i<SWITCH_COUNT; i++) {
-    if (switches[i].enabled) {
-      switches[i].update();
-    }
+    if (switches[i].enabled) switches[i].update();
   }
+  
+  if (relay_state_updated || (last_updated_at + UPDATE_RELAYS_EVERY < millis())) {
+    relay_state_updated = false;    
 
-  if (relay_state_updated) {
     sendRelayStates(0, 1, node);
-    
     delay(50);
-
     sendRelayStates(1, 2, node);
 
-    relay_state_updated = false;    
+    last_updated_at = millis();
   }
 
   processRelayUnit(0);

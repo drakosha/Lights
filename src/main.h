@@ -18,7 +18,8 @@
 #define RELAYS_PER_UNIT 24
 #define RELAY_COUNT RELAY_UNIT_COUNT*RELAYS_PER_UNIT
 
-#define SWITCH_COUNT 22
+#define UPDATE_RELAYS_EVERY 1000   // update interval in milliseconds
+#define SWITCH_COUNT 24
 
 extern int8_t relay_map[RELAY_COUNT];
 extern Switch switches[SWITCH_COUNT];
