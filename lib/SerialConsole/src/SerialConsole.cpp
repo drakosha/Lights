@@ -16,7 +16,7 @@ void SerialConsole::begin(Stream & serial) {
     m_serial = & serial;
 }
 
-void SerialConsole::pull() {
+void SerialConsole::poll() {
     if (!m_serial->available()) return;
     
     char r = (char) m_serial->read();

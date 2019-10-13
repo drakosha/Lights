@@ -28,7 +28,7 @@ class SerialConsole {
         SerialConsole(Stream & serial);
         
         void begin(Stream & serial);
-        void pull();
+        void poll();
         void enableEcho();
         void disableEcho();
         void addChar(char c);
