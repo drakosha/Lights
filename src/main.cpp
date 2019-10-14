@@ -10,7 +10,7 @@ Switch switches[SWITCH_COUNT];
 
 SerialConsole console(Serial);
 ModbusMaster node;
-Modbus slave(1, MODBUS_CONTROL_PIN_NONE);
+Modbus slave(Serial2, 1, MODBUS_CONTROL_PIN_NONE);
 
 void setup()
 {
@@ -33,13 +33,14 @@ void setup()
   for(int i=1; i<=16; i++) DmxSimple.write(i, 255);
   last_updated_at = millis();
 
-  Serial.begin(115200);
+  Serial.begin(115200);  // init console port
+  
+  // Init modbus slave on Serial2
+  Serial2.begin(115200); // init modbus slave port
   slave.begin(115200);
   slave.cbVector[CB_READ_COILS] = readCoils;
   slave.cbVector[CB_WRITE_COILS] = writeRelays;
   slave.cbVector[CB_WRITE_HOLDING_REGISTERS] = writeDimmers;
-
-  if (slave_mode) return;
 
   processRelayUnit(0);
   processRelayUnit(1);
