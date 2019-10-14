@@ -131,12 +131,12 @@ uint8_t writeDimmers(uint8_t fc, uint16_t address, uint16_t length) {
   uint8_t value;
   uint8_t channel;
   
-  if ((address < 1) || (address + length > DMX_DIMMERS_COUNT))
+  if ((address < 1) || (address + length > DMX_DIMMERS_COUNT + 1))
     return STATUS_ILLEGAL_DATA_ADDRESS;
 
   for(uint16_t i=0; i<length; i++) {
     channel = i + address;
-    value = (uint8_t) slave.readRegisterFromBuffer(channel);
+    value = (uint8_t) slave.readRegisterFromBuffer(i);
     DmxSimple.write(channel, value);
   }
   
