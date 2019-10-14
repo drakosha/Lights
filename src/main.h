@@ -41,6 +41,7 @@ void processRelayUnit(int8_t unit);
 uint8_t readCoils(uint8_t fc, uint16_t address, uint16_t length);
 uint8_t writeRelays(uint8_t fc, uint16_t address, uint16_t length);
 uint8_t writeDimmers(uint8_t fc, uint16_t address, uint16_t length);
+uint8_t readDimmers(uint8_t, uint16_t address, uint16_t length);
 
 void cmdHelp(Stream * serial);
 #endif // __MAIN_H__

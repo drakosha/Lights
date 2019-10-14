@@ -41,6 +41,7 @@ void setup()
   slave.cbVector[CB_READ_COILS] = readCoils;
   slave.cbVector[CB_WRITE_COILS] = writeRelays;
   slave.cbVector[CB_WRITE_HOLDING_REGISTERS] = writeDimmers;
+  slave.cbVector[CB_READ_INPUT_REGISTERS] = readDimmers;
 
   processRelayUnit(0);
   processRelayUnit(1);
@@ -54,7 +55,9 @@ void setup()
 void loop()
 {
   int i;
-  if (slave_mode) slave.poll(); else console.poll();
+
+  slave.poll();   // Poll modbus slave interface 
+  console.poll(); // Poll console interface
 
   for (i=0; i<SWITCH_COUNT; i++) {
     if (switches[i].enabled) switches[i].update();
@@ -79,7 +82,7 @@ void loop()
 uint8_t readSwitches(uint8_t fc, uint16_t address, uint16_t length) {
   bool value;
   uint8_t sw;
-  
+
   for(int i=0; i<length; i++) {
     sw = i + address - 1; // We starts from 1 coil
     
@@ -92,9 +95,18 @@ uint8_t readSwitches(uint8_t fc, uint16_t address, uint16_t length) {
   return STATUS_OK;
 }
 
+uint8_t readDimmers(uint8_t, uint16_t address, uint16_t length) {
+  if (address > DMX_DIMMERS_COUNT) return STATUS_ILLEGAL_DATA_ADDRESS;
+
+  for (uint8_t i = 0; i < length; i++)
+    slave.writeRegisterToBuffer(i, DmxSimple.read(i + address - 1));
+  
+  return STATUS_OK;
+}
+
 uint8_t readRelays(uint8_t fc, uint16_t address, uint16_t length) {
   uint8_t relay;
-  
+
   for(uint16_t i=0; i<length; i++) {
     relay = i + address;
     
@@ -114,6 +126,7 @@ uint8_t readCoils(uint8_t fc, uint16_t address, uint16_t length) {
 uint8_t writeRelays(uint8_t fc, uint16_t address, uint16_t length) {
   bool value;
   uint8_t relay;
+
   for(uint16_t i=0; i<length; i++) {
     relay = i + address - MODBUS_RELAY_SHIFT;
     
@@ -139,7 +152,7 @@ uint8_t writeDimmers(uint8_t fc, uint16_t address, uint16_t length) {
     value = (uint8_t) slave.readRegisterFromBuffer(i);
     DmxSimple.write(channel, value);
   }
-  
+
   return STATUS_OK;
 }
 
