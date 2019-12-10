@@ -42,6 +42,7 @@ void setup()
   slave.cbVector[CB_WRITE_COILS] = writeRelays;
   slave.cbVector[CB_WRITE_HOLDING_REGISTERS] = writeDimmers;
   slave.cbVector[CB_READ_INPUT_REGISTERS] = readDimmers;
+  slave.cbVector[CB_READ_HOLDING_REGISTERS] = readDimmers;
 
   processRelayUnit(0);
   processRelayUnit(1);
